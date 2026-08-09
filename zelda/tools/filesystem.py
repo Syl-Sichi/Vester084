@@ -38,7 +38,7 @@ class FilesystemReadTool(Tool):
         if path.stat().st_size > 1_000_000:
             return ExecutionResult(False, "File is larger than the safe read limit.")
         try:
-            content = path.read_text(encoding="utf 8")
+            content = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             return ExecutionResult(False, "File is not valid UTF 8 text.")
         return ExecutionResult(True, "File read successfully.", {"path": str(path), "content": content})
