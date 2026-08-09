@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 
 from zelda.api import handle_command
-from zelda.health import health_snapshot
+from zelda.health import snapshot
 
 
 class ZeldaHandler(BaseHTTPRequestHandler):
@@ -16,7 +16,7 @@ class ZeldaHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         if self.path == "/health":
-            self._json(200, health_snapshot())
+            self._json(200, snapshot())
             return
         self._json(404, {"error": "not_found"})
 
