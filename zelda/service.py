@@ -1,12 +1,13 @@
 import logging
 import signal
 import threading
+from typing import Any
 
 from zelda.events.bus import Event, EventBus
 
 
 class ZeldaService:
-    """Long running host service with graceful shutdown and event dispatch."""
+    """Long running host service with graceful shutdown and command dispatch."""
 
     def __init__(self, event_bus: EventBus | None = None) -> None:
         self.event_bus = event_bus or EventBus()
@@ -16,6 +17,11 @@ class ZeldaService:
     def request_stop(self, *_args) -> None:
         self.logger.info("Shutdown requested")
         self.stop_event.set()
+
+    def handle_command(self, command: str) -> dict[str, Any]:
+        self.event_bus.publish(Event("command.received", {"command": command}))
+        self.logger.info("Command received: %s", command)
+        return {"accepted": True, "command": command}
 
     def run(self) -> None:
         signal.signal(signal.SIGINT, self.request_stop)
