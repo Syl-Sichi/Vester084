@@ -1,6 +1,7 @@
 from zelda.control.capabilities import Capability, CapabilityRegistry
 from zelda.control.ubuntu_processes import UbuntuProcessCapabilities
 from zelda.control.ubuntu_readonly import UbuntuReadonlyCapabilities
+from zelda.control.ubuntu_resources import UbuntuResourceCapabilities
 
 
 def register_ubuntu_readonly_capabilities(registry: CapabilityRegistry) -> None:
@@ -20,6 +21,16 @@ def register_ubuntu_readonly_capabilities(registry: CapabilityRegistry) -> None:
             "system.processes.read",
             "Read running process IDs and names",
             UbuntuProcessCapabilities.processes_read,
+        ),
+        Capability(
+            "system.memory.read",
+            "Read host memory and swap statistics",
+            UbuntuResourceCapabilities.memory_read,
+        ),
+        Capability(
+            "system.disk.read",
+            "Read disk usage for a requested path",
+            UbuntuResourceCapabilities.disk_read,
         ),
     )
     for capability in capabilities:
