@@ -37,4 +37,8 @@ class RulesProvider:
 def build_provider(name: str) -> AIProvider:
     if name == "rules":
         return RulesProvider()
+    if name == "ollama":
+        from zelda.control.ollama_provider import OllamaProvider
+
+        return OllamaProvider()
     raise ValueError(f"ai_provider_not_implemented:{name}")
