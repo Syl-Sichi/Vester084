@@ -3,25 +3,41 @@ import signal
 import threading
 from typing import Any
 
+from zelda.control.ai_control import AIControlService
+from zelda.control.bootstrap import register_ubuntu_readonly_capabilities
+from zelda.control.capabilities import CapabilityRegistry
+from zelda.control.policy import CapabilityPolicy
 from zelda.events.bus import Event, EventBus
 
 
 class ZeldaService:
-    """Long running host service with graceful shutdown and command dispatch."""
+    """Long running host service with controlled AI command dispatch."""
 
     def __init__(self, event_bus: EventBus | None = None) -> None:
         self.event_bus = event_bus or EventBus()
         self.stop_event = threading.Event()
         self.logger = logging.getLogger("zelda.service")
 
+        self.capabilities = CapabilityRegistry()
+        register_ubuntu_readonly_capabilities(self.capabilities)
+        self.policy = CapabilityPolicy.from_registry(self.capabilities)
+        self.ai_control = AIControlService(self.capabilities, self.policy)
+
     def request_stop(self, *_args) -> None:
         self.logger.info("Shutdown requested")
         self.stop_event.set()
 
     def handle_command(self, command: str) -> dict[str, Any]:
-        self.event_bus.publish(Event("command.received", {"command": command}))
-        self.logger.info("Command received: %s", command)
-        return {"accepted": True, "command": command}
+        try:
+            result = self.ai_control.handle(command)
+            self.event_bus.publish(Event("command.executed", result))
+            self.logger.info("Command executed through capability %s", result["capability"])
+            return result
+        except (ValueError, PermissionError) as exc:
+            error = {"accepted": False, "error": str(exc), "command": command}
+            self.event_bus.publish(Event("command.rejected", error))
+            self.logger.warning("Command rejected: %s", exc)
+            return error
 
     def run(self) -> None:
         signal.signal(signal.SIGINT, self.request_stop)
