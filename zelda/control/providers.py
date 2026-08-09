@@ -24,6 +24,10 @@ class RulesProvider:
         "system info": "system.info",
         "show system info": "system.info",
         "what system am i running": "system.info",
+        "show memory": "system.memory.read",
+        "show memory usage": "system.memory.read",
+        "show disk usage": "system.disk.read",
+        "show disk space": "system.disk.read",
     }
 
     def interpret(self, text: str) -> ProviderIntent:
