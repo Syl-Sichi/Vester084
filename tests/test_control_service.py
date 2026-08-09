@@ -23,4 +23,6 @@ def test_control_service_exposes_registered_capabilities():
         "system.info",
         "system.environment.read",
         "system.processes.read",
+        "system.memory.read",
+        "system.disk.read",
     }
