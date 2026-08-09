@@ -1,8 +1,20 @@
 # Z.E.L.D.A.
 
-Personal AI operating system, built around an Ubuntu control core.
+Z.E.L.D.A. is a modular AI control system built around an Ubuntu control core.
 
-> Development repository: `Vester084` — intended to be renamed to `Z.E.L.D.A.` later.
+## Phase 1: working control service
+
+The first implementation is now in place as a small local Python service with:
+
+* Command intake
+* Deterministic intent routing
+* Explicit tool registration
+* Permission checks
+* In memory audit logging
+* Safe system status and time tools
+* A clean extension point for an AI model
+
+Z.E.L.D.A. does **not** expose unrestricted shell execution.
 
 ## Architecture
 
@@ -10,38 +22,65 @@ Personal AI operating system, built around an Ubuntu control core.
 You
  │
  ▼
-AI Core
+Control API
  │
  ▼
-Intent / Tool Router
+AI Core / Intent Router
  │
  ▼
-Permission Layer
+Permission Engine
  │
- ├── Ubuntu Tools
- │   ├── System
- │   ├── Applications
- │   ├── Files
- │   └── Network
+ ▼
+Explicit Tool Registry
+ ├── System Status
+ └── Time
  │
- ├── Communications
- │   ├── Phone
- │   ├── SMS
- │   ├── Email
- │   └── Social platforms
- │
- ├── Android Companion
- │
- ├── Memory
- │
- ├── Voice
- │
- └── Visual Core
+ ▼
+Audit Log
 ```
 
-## Phase 1
+The next layer will connect an AI provider to the intent and tool routing system. Additional tools will then be added as isolated capabilities.
 
-The first milestone is a local Ubuntu control service with an explicit tool registry. Z.E.L.D.A. must not receive unrestricted shell access. Capabilities are exposed as individual tools with permission and audit controls.
+## Run on Ubuntu
+
+From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+PYTHONPATH=src python -m zelda
+```
+
+The service listens on `127.0.0.1:8787`.
+
+## API
+
+### Health
+
+```bash
+curl http://127.0.0.1:8787/health
+```
+
+### List tools
+
+```bash
+curl http://127.0.0.1:8787/v1/tools
+```
+
+### Send a command
+
+```bash
+curl -X POST http://127.0.0.1:8787/v1/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"system status"}'
+```
+
+## Test
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
 
 ## Roadmap
 
