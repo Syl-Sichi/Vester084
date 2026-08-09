@@ -9,5 +9,12 @@ description = "Secure modular control core for Z.E.L.D.A."
 requires-python = ">=3.11"
 dependencies = []
 
+[project.scripts]
+zelda = "zelda.cli:main"
+
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "."]
+include = ["zelda*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
