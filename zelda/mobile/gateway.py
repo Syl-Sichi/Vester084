@@ -41,8 +41,12 @@ class MobileGateway:
         if not isinstance(command, str) or not command.strip():
             self.transport.send(TransportFrame("ERROR", frame.request_id, {"error": "command_required"}))
             return
-        result = self.command_handler(command.strip())
-        self.transport.send(TransportFrame("RESPONSE", frame.request_id, {"result": result}))
+
+        try:
+            result = self.command_handler(command.strip())
+            self.transport.send(TransportFrame("RESPONSE", frame.request_id, {"result": result}))
+        except Exception as exc:
+            self.transport.send(TransportFrame("ERROR", frame.request_id, {"error": "command_failed", "detail": str(exc)}))
 
     def _hello(self, frame: TransportFrame) -> None:
         if self.sync is None:
