@@ -25,4 +25,9 @@ def test_control_service_exposes_registered_capabilities():
         "system.processes.read",
         "system.memory.read",
         "system.disk.read",
+        "system.network.info",
+        "system.network.port.check",
+        "app.list",
+        "app.find",
+        "app.status",
     }
