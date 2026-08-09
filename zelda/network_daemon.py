@@ -25,7 +25,7 @@ def build_runtime(service: ZeldaService, config: ZeldaConfig) -> NetworkRuntime:
 
 async def run(config: ZeldaConfig | None = None) -> None:
     config = config or ZeldaConfig.from_env()
-    service = ZeldaService()
+    service = ZeldaService(config=config)
     runtime = build_runtime(service, config)
     await runtime.start(serve)
     service.event_bus.publish(Event("network.started"))
