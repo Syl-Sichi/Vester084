@@ -31,6 +31,9 @@ class RulesProvider:
         "show network info": "system.network.info",
         "show network information": "system.network.info",
         "show local network info": "system.network.info",
+        "list applications": "app.list",
+        "list installed applications": "app.list",
+        "show installed applications": "app.list",
     }
 
     def interpret(self, text: str) -> ProviderIntent:
