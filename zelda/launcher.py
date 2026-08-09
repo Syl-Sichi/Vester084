@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import platform
 
+from zelda.setup_wizard import needs_setup, run_setup
+
 
 def startup_message() -> str:
     host = platform.system()
@@ -14,6 +16,12 @@ def startup_message() -> str:
 
 def launch() -> None:
     print(startup_message())
+
+    if needs_setup():
+        print("First run detected. Configuring Z.E.L.D.A...")
+        config = run_setup()
+        print(f"Setup complete for {config['platform']}")
+
     from zelda.cli import main
     main()
 
