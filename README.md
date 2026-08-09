@@ -1,96 +1,67 @@
 # Z.E.L.D.A.
 
-Z.E.L.D.A. is a modular AI control system built around an Ubuntu control core.
+Z.E.L.D.A. is an Ubuntu first AI control system built around explicit capabilities, model providers, permissions, and auditable execution.
 
-## Phase 1: working control service
-
-The first implementation is now in place as a small local Python service with:
-
-* Command intake
-* Deterministic intent routing
-* Explicit tool registration
-* Permission checks
-* In memory audit logging
-* Safe system status and time tools
-* A clean extension point for an AI model
-
-Z.E.L.D.A. does **not** expose unrestricted shell execution.
-
-## Architecture
+## Current architecture
 
 ```text
-You
- │
- ▼
-Control API
- │
- ▼
-AI Core / Intent Router
- │
- ▼
-Permission Engine
- │
- ▼
-Explicit Tool Registry
- ├── System Status
- └── Time
- │
- ▼
-Audit Log
+User
+  -> CLI / API
+  -> Brain
+  -> Model Provider
+  -> Intent
+  -> Tool Registry
+  -> Permission Engine
+  -> Tool
+  -> Result
 ```
 
-The next layer will connect an AI provider to the intent and tool routing system. Additional tools will then be added as isolated capabilities.
+## Current capabilities
 
-## Run on Ubuntu
+* Safe Ubuntu system status
+* Current UTC time
+* Explicit tool registration
+* Default deny permissions
+* Deterministic fallback intent parser
+* Local Ollama provider
+* Programmatic command API
+* Command line interface
 
-From the repository root:
+Arbitrary shell execution is intentionally not exposed by the current tool registry.
+
+## Local AI
+
+Install Ollama separately on the Ubuntu host, then configure:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-PYTHONPATH=src python -m zelda
+export ZELDA_AI_PROVIDER=ollama
+export ZELDA_OLLAMA_MODEL=gemma3:4b
 ```
 
-The service listens on `127.0.0.1:8787`.
+Z.E.L.D.A. uses `http://127.0.0.1:11434` by default. Without this configuration, the deterministic rules provider remains active.
 
-## API
-
-### Health
+## CLI
 
 ```bash
-curl http://127.0.0.1:8787/health
+python -m zelda.cli "check my computer"
+python -m zelda.cli "what time is it"
 ```
 
-### List tools
+## Development
 
 ```bash
-curl http://127.0.0.1:8787/v1/tools
-```
-
-### Send a command
-
-```bash
-curl -X POST http://127.0.0.1:8787/v1/command \
-  -H 'Content-Type: application/json' \
-  -d '{"command":"system status"}'
-```
-
-## Test
-
-```bash
-PYTHONPATH=src python -m unittest discover -s tests -v
+pytest
 ```
 
 ## Roadmap
 
 1. Ubuntu control core
-2. AI model integration and natural language tool selection
-3. Permission and confirmation engine
-4. Voice interface
-5. Persistent memory
+2. Natural language AI routing
+3. Confirmation and approval workflows
+4. Persistent memory
+5. Voice interface
 6. Android companion
-7. Communications bridge
-8. Visual Three.js core
+7. Messaging and social integrations
+8. Visual interface
 9. Device and smart home bridge
 10. Advanced workflows
