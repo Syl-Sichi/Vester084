@@ -2,21 +2,23 @@ from pathlib import Path
 from typing import Any
 
 from zelda.core.models import ExecutionResult
+from zelda.core.workspace import WorkspacePolicy
 from zelda.tools.base import Tool
 
 
 class FilesystemListTool(Tool):
     name = "filesystem.list"
-    description = "List entries in a permitted directory without modifying files."
+    description = "List entries in a permitted workspace directory without modifying files."
+
+    def __init__(self, workspace: WorkspacePolicy | None = None) -> None:
+        self.workspace = workspace or WorkspacePolicy()
 
     def execute(self, arguments: dict[str, Any]) -> ExecutionResult:
-        raw_path = str(arguments.get("path", "."))
-        path = Path(raw_path).expanduser().resolve()
-        if not path.exists():
+        path = Path(str(arguments.get("path", "."))).expanduser().resolve()
+        if not self.workspace.allows(str(path)):
+            return ExecutionResult(False, "Path is outside the permitted Z.E.L.D.A. workspace.")
+        if not path.exists() or not path.is_dir():
             return ExecutionResult(False, "Directory does not exist.")
-        if not path.is_dir():
-            return ExecutionResult(False, "Path is not a directory.")
-
         entries = [
             {"name": item.name, "type": "directory" if item.is_dir() else "file"}
             for item in sorted(path.iterdir(), key=lambda p: p.name.lower())
@@ -26,13 +28,18 @@ class FilesystemListTool(Tool):
 
 class FilesystemReadTool(Tool):
     name = "filesystem.read"
-    description = "Read a UTF 8 text file within the permitted workspace."
+    description = "Read a UTF 8 text file inside the permitted workspace."
+
+    def __init__(self, workspace: WorkspacePolicy | None = None) -> None:
+        self.workspace = workspace or WorkspacePolicy()
 
     def execute(self, arguments: dict[str, Any]) -> ExecutionResult:
-        raw_path = str(arguments.get("path", ""))
+        raw_path = str(arguments.get("path", "")).strip()
         if not raw_path:
             return ExecutionResult(False, "A file path is required.")
         path = Path(raw_path).expanduser().resolve()
+        if not self.workspace.allows(str(path)):
+            return ExecutionResult(False, "Path is outside the permitted Z.E.L.D.A. workspace.")
         if not path.exists() or not path.is_file():
             return ExecutionResult(False, "File does not exist.")
         if path.stat().st_size > 1_000_000:
