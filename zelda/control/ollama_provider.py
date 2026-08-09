@@ -6,6 +6,14 @@ from urllib import request
 from zelda.control.providers import ProviderIntent
 
 
+SUPPORTED_CAPABILITIES = {
+    "system.info",
+    "system.processes.read",
+    "system.memory.read",
+    "system.disk.read",
+}
+
+
 class OllamaProvider:
     """Local Ollama adapter that only returns structured capability intents."""
 
@@ -16,7 +24,9 @@ class OllamaProvider:
     def interpret(self, text: str) -> ProviderIntent:
         prompt = (
             "Return JSON only with keys capability and args. "
-            "Choose only from: system.info, system.processes.read. "
+            f"Choose only from: {', '.join(sorted(SUPPORTED_CAPABILITIES))}. "
+            "For system.disk.read, args may contain one filesystem path. "
+            "For all other supported capabilities, args must be []. "
             "If unsupported, return capability unsupported and args [].\n"
             f"Request: {text}"
         )
@@ -31,6 +41,10 @@ class OllamaProvider:
             raise ValueError("invalid_provider_response")
         if capability == "unsupported":
             raise ValueError("intent_not_supported")
-        if capability not in {"system.info", "system.processes.read"}:
+        if capability not in SUPPORTED_CAPABILITIES:
             raise ValueError("capability_not_supported")
+        if capability != "system.disk.read" and args:
+            raise ValueError("invalid_capability_args")
+        if capability == "system.disk.read" and len(args) > 1:
+            raise ValueError("invalid_capability_args")
         return ProviderIntent(capability, args)
