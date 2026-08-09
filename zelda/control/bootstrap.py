@@ -1,4 +1,5 @@
 from zelda.control.capabilities import Capability, CapabilityRegistry
+from zelda.control.ubuntu_apps import UbuntuApplicationCapabilities
 from zelda.control.ubuntu_network import UbuntuNetworkCapabilities
 from zelda.control.ubuntu_processes import UbuntuProcessCapabilities
 from zelda.control.ubuntu_readonly import UbuntuReadonlyCapabilities
@@ -15,6 +16,9 @@ def register_ubuntu_readonly_capabilities(registry: CapabilityRegistry) -> None:
         Capability("system.disk.read", "Read disk usage for a requested path", UbuntuResourceCapabilities.disk_read),
         Capability("system.network.info", "Read local hostname and addresses", UbuntuNetworkCapabilities.network_info),
         Capability("system.network.port.check", "Check whether a local TCP port is open", UbuntuNetworkCapabilities.port_check),
+        Capability("app.list", "List installed desktop applications", UbuntuApplicationCapabilities.app_list),
+        Capability("app.find", "Find installed desktop applications by name", UbuntuApplicationCapabilities.app_find),
+        Capability("app.status", "Check whether a matching application process is running", UbuntuApplicationCapabilities.app_status),
     )
     for capability in capabilities:
         if registry.get(capability.name) is None:
