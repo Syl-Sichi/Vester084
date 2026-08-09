@@ -1,11 +1,13 @@
 [Unit]
 Description=Z.E.L.D.A. AI Control Service
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
 User=%i
-Environment=ZELDA_AI_PROVIDER=rules
+EnvironmentFile=-%h/.config/zelda/zelda.env
+Environment=PYTHONUNBUFFERED=1
 ExecStart=%h/.local/bin/zelda-daemon
 Restart=on-failure
 RestartSec=3
