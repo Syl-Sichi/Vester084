@@ -3,25 +3,36 @@ import signal
 import threading
 from typing import Any
 
+from zelda.config import ZeldaConfig
 from zelda.control.ai_control import AIControlService
 from zelda.control.bootstrap import register_ubuntu_readonly_capabilities
 from zelda.control.capabilities import CapabilityRegistry
 from zelda.control.policy import CapabilityPolicy
+from zelda.control.providers import build_provider
 from zelda.events.bus import Event, EventBus
 
 
 class ZeldaService:
     """Long running host service with controlled AI command dispatch."""
 
-    def __init__(self, event_bus: EventBus | None = None) -> None:
+    def __init__(self, event_bus: EventBus | None = None, config: ZeldaConfig | None = None) -> None:
         self.event_bus = event_bus or EventBus()
         self.stop_event = threading.Event()
         self.logger = logging.getLogger("zelda.service")
+        self.config = config or ZeldaConfig.from_env()
 
         self.capabilities = CapabilityRegistry()
         register_ubuntu_readonly_capabilities(self.capabilities)
         self.policy = CapabilityPolicy.from_registry(self.capabilities)
-        self.ai_control = AIControlService(self.capabilities, self.policy)
+        self.ai_control = AIControlService(
+            self.capabilities,
+            self.policy,
+            provider=build_provider(
+                self.config.ai_provider,
+                ollama_url=self.config.ollama_url,
+                ollama_model=self.config.ollama_model,
+            ),
+        )
 
     def request_stop(self, *_args) -> None:
         self.logger.info("Shutdown requested")
