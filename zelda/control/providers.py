@@ -34,11 +34,11 @@ class RulesProvider:
         return ProviderIntent(capability, [])
 
 
-def build_provider(name: str) -> AIProvider:
+def build_provider(name: str, *, ollama_url: str = "http://127.0.0.1:11434", ollama_model: str = "gemma3") -> AIProvider:
     if name == "rules":
         return RulesProvider()
     if name == "ollama":
         from zelda.control.ollama_provider import OllamaProvider
 
-        return OllamaProvider()
+        return OllamaProvider(base_url=ollama_url, model=ollama_model)
     raise ValueError(f"ai_provider_not_implemented:{name}")
