@@ -11,6 +11,7 @@ dependencies = []
 
 [project.scripts]
 zelda = "zelda.cli:main"
+zelda-launch = "zelda.launcher:launch"
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
