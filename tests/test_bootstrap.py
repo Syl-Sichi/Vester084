@@ -7,9 +7,14 @@ def test_ubuntu_bootstrap_is_idempotent():
     register_ubuntu_readonly_capabilities(registry)
     register_ubuntu_readonly_capabilities(registry)
     assert registry.names() == (
+        "app.find",
+        "app.list",
+        "app.status",
         "system.disk.read",
         "system.environment.read",
         "system.info",
         "system.memory.read",
+        "system.network.info",
+        "system.network.port.check",
         "system.processes.read",
     )
