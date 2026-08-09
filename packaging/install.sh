@@ -3,7 +3,9 @@ set -euo pipefail
 
 APP_DIR="/opt/zelda"
 SERVICE_USER="zelda"
-UNIT_SOURCE="$(dirname "$(readlink -f "$0")")/systemd/zelda.service"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+UNIT_SOURCE="$SCRIPT_DIR/systemd/zelda.service"
 UNIT_TARGET="/etc/systemd/system/zelda.service"
 
 if [[ "$(id -u)" -ne 0 ]]; then
@@ -11,8 +13,8 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
-if [[ ! -f "$UNIT_SOURCE" ]]; then
-  echo "Missing systemd unit: $UNIT_SOURCE" >&2
+if [[ ! -f "$UNIT_SOURCE" || ! -d "$REPO_ROOT/zelda" ]]; then
+  echo "Run this installer from a complete Z.E.L.D.A. repository checkout." >&2
   exit 1
 fi
 
@@ -22,10 +24,14 @@ fi
 
 install -d -o "$SERVICE_USER" -g "$SERVICE_USER" -m 0750 "$APP_DIR"
 
-if [[ -f requirements.txt ]]; then
-  python3 -m venv "$APP_DIR/.venv"
-  "$APP_DIR/.venv/bin/python" -m pip install --upgrade pip
-  "$APP_DIR/.venv/bin/pip" install -r requirements.txt
+# Copy application source without copying the repository's .git metadata.
+rm -rf "$APP_DIR/zelda"
+cp -a "$REPO_ROOT/zelda" "$APP_DIR/zelda"
+
+python3 -m venv "$APP_DIR/.venv"
+"$APP_DIR/.venv/bin/python" -m pip install --upgrade pip
+if [[ -f "$REPO_ROOT/requirements.txt" ]]; then
+  "$APP_DIR/.venv/bin/pip" install -r "$REPO_ROOT/requirements.txt"
 fi
 
 install -d -m 0755 "$(dirname "$UNIT_TARGET")"
