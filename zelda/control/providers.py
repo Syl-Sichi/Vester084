@@ -28,6 +28,9 @@ class RulesProvider:
         "show memory usage": "system.memory.read",
         "show disk usage": "system.disk.read",
         "show disk space": "system.disk.read",
+        "show network info": "system.network.info",
+        "show network information": "system.network.info",
+        "show local network info": "system.network.info",
     }
 
     def interpret(self, text: str) -> ProviderIntent:
