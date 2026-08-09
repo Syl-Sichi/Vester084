@@ -39,3 +39,8 @@ class ZeldaConfig:
     @property
     def ollama_enabled(self) -> bool:
         return self.ai_provider == "ollama"
+
+
+def use_ollama() -> bool:
+    """Backward compatible helper for the existing application layer."""
+    return ZeldaConfig.from_env().ollama_enabled
