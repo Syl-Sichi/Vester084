@@ -10,7 +10,7 @@ User=zelda
 Group=zelda
 WorkingDirectory=/opt/zelda
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/usr/bin/python3 -m zelda.daemon
+ExecStart=/opt/zelda/.venv/bin/python -m zelda.daemon
 Restart=on-failure
 RestartSec=5
 
