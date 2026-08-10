@@ -3,9 +3,30 @@ import AppKit
 
 @main
 struct ZELDAApp: App {
+    @StateObject private var nativeServer = NativeServerState()
+
     var body: some Scene {
         WindowGroup("Z.E.L.D.A.") {
             ContentView()
+                .task {
+                    nativeServer.start()
+                }
+        }
+    }
+}
+
+@MainActor
+final class NativeServerState: ObservableObject {
+    private let server = NativeCommandServer()
+    @Published var isRunning = false
+
+    func start() {
+        guard !isRunning else { return }
+        do {
+            try server.start()
+            isRunning = true
+        } catch {
+            print("Z.E.L.D.A. native command server failed: \(error)")
         }
     }
 }
