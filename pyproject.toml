@@ -12,6 +12,7 @@ dependencies = []
 [project.scripts]
 zelda = "zelda.cli:main"
 zelda-launch = "zelda.launcher:launch"
+zelda-macos-setup = "zelda.macos_setup:main"
 
 [tool.setuptools.packages.find]
 where = ["src", "."]
