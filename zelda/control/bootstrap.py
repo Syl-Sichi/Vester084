@@ -1,4 +1,5 @@
 from zelda.control.capabilities import Capability, CapabilityRegistry
+from zelda.control.macos_display import MacOSDisplayCapabilities
 from zelda.control.ubuntu_apps import UbuntuApplicationCapabilities
 from zelda.control.ubuntu_network import UbuntuNetworkCapabilities
 from zelda.control.ubuntu_processes import UbuntuProcessCapabilities
@@ -19,6 +20,17 @@ def register_ubuntu_readonly_capabilities(registry: CapabilityRegistry) -> None:
         Capability("app.list", "List installed desktop applications", UbuntuApplicationCapabilities.app_list),
         Capability("app.find", "Find installed desktop applications by name", UbuntuApplicationCapabilities.app_find),
         Capability("app.status", "Check whether a matching application process is running", UbuntuApplicationCapabilities.app_status),
+    )
+    for capability in capabilities:
+        if registry.get(capability.name) is None:
+            registry.register(capability)
+
+
+def register_macos_display_capabilities(registry: CapabilityRegistry) -> None:
+    """Register macOS display intents behind the common capability boundary."""
+    capabilities = (
+        Capability("display.list", "Request native macOS display information", MacOSDisplayCapabilities.list_displays),
+        Capability("window.move", "Request moving the Z.E.L.D.A. window to a display", lambda args: MacOSDisplayCapabilities.move_zelda(args[0] if args else "primary")),
     )
     for capability in capabilities:
         if registry.get(capability.name) is None:
