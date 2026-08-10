@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import Network
 
 @MainActor
 final class NativeCommandServer: NSObject {
