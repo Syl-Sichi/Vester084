@@ -6,7 +6,7 @@ Z.E.L.D.A. is a cross platform AI control system built around explicit capabilit
 
 ```text
 User
-  -> CLI / Launcher
+  -> CLI / Desktop Shell
   -> Brain
   -> Model Provider
   -> Intent
@@ -15,6 +15,8 @@ User
   -> Platform Capability
   -> Result
 ```
+
+The desktop shell is intentionally separate from execution. Desktop, CLI, and future voice interfaces use the same controlled runtime and permission boundary.
 
 ## Supported platforms
 
@@ -38,6 +40,7 @@ Z.E.L.D.A. selects platform specific capabilities while keeping the AI core shar
 * Confirmation based actions
 * Local Ollama provider
 * Deterministic fallback provider
+* Desktop shell state model
 
 Arbitrary shell execution is intentionally not exposed by the tool registry.
 
@@ -70,6 +73,19 @@ export ZELDA_OLLAMA_MODEL=gemma3:4b
 
 Without this configuration, the deterministic rules provider remains active.
 
+## Desktop shell
+
+The first desktop layer is represented by `zelda.desktop.DesktopShell`. It provides the UI state boundary for:
+
+* Chat
+* System
+* Apps
+* Files
+* Security
+* Settings
+
+The shell does not execute arbitrary operating system commands. A future native macOS UI will connect these views to the existing controlled service.
+
 ## CLI
 
 ```bash
@@ -88,9 +104,12 @@ pytest
 1. Cross platform control core
 2. Natural language routing
 3. Confirmation workflows
-4. Persistent memory
-5. Voice interface
-6. Desktop interface
-7. Messaging integrations
-8. Smart home bridge
-9. Advanced workflows
+4. Dynamic permission engine
+5. Application manager
+6. File intelligence
+7. Persistent memory
+8. Voice interface
+9. Native desktop interface
+10. Messaging integrations
+11. Smart home bridge
+12. Advanced workflows
