@@ -1,11 +1,12 @@
 import logging
+import platform
 import signal
 import threading
 from typing import Any
 
 from zelda.config import ZeldaConfig
 from zelda.control.ai_control import AIControlService
-from zelda.control.bootstrap import register_ubuntu_readonly_capabilities
+from zelda.control.bootstrap import register_macos_display_capabilities, register_ubuntu_readonly_capabilities
 from zelda.control.capabilities import CapabilityRegistry
 from zelda.control.policy import CapabilityPolicy
 from zelda.control.providers import build_provider
@@ -23,6 +24,8 @@ class ZeldaService:
 
         self.capabilities = CapabilityRegistry()
         register_ubuntu_readonly_capabilities(self.capabilities)
+        if platform.system() == "Darwin":
+            register_macos_display_capabilities(self.capabilities)
         self.policy = CapabilityPolicy.from_registry(self.capabilities)
         self.ai_control = AIControlService(
             self.capabilities,
