@@ -9,10 +9,18 @@ struct ZELDAApp: App {
     }
 }
 
+struct ChatMessage: Identifiable {
+    let id = UUID()
+    let text: String
+    let fromUser: Bool
+}
+
 struct ContentView: View {
     private let views = ["Chat", "System", "Apps", "Files", "Security", "Settings"]
+    @StateObject private var service = ZELDAServiceClient()
     @State private var selectedView = "Chat"
     @State private var message = ""
+    @State private var messages: [ChatMessage] = []
 
     var body: some View {
         NavigationSplitView {
@@ -26,23 +34,40 @@ struct ContentView: View {
                     Text(selectedView)
                         .font(.title2.bold())
                     Spacer()
-                    Label("Ready", systemImage: "circle.fill")
-                        .foregroundStyle(.secondary)
+                    Label(
+                        service.isConnected ? "Connected" : "Offline",
+                        systemImage: service.isConnected ? "circle.fill" : "circle"
+                    )
+                    .foregroundStyle(.secondary)
                 }
 
                 if selectedView == "Chat" {
-                    Spacer()
-                    Text("Good morning. How can I help?")
-                        .font(.title3)
-                    Spacer()
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 10) {
+                            if messages.isEmpty {
+                                Text("Good morning. How can I help?")
+                                    .font(.title3)
+                            }
+                            ForEach(messages) { item in
+                                HStack {
+                                    if item.fromUser { Spacer() }
+                                    Text(item.text)
+                                        .padding(10)
+                                        .background(item.fromUser ? Color.accentColor.opacity(0.15) : Color.secondary.opacity(0.12))
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    if !item.fromUser { Spacer() }
+                                }
+                            }
+                        }
+                    }
 
                     HStack {
                         TextField("Ask Z.E.L.D.A.", text: $message)
                             .textFieldStyle(.roundedBorder)
-                        Button("Send") {
-                            message = ""
-                        }
-                        .buttonStyle(.borderedProminent)
+                            .onSubmit { sendMessage() }
+                        Button("Send") { sendMessage() }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 } else {
                     ContentUnavailableView(
@@ -53,8 +78,21 @@ struct ContentView: View {
                 }
             }
             .padding()
+            .task { await service.checkHealth() }
         }
         .frame(minWidth: 820, minHeight: 560)
+    }
+
+    private func sendMessage() {
+        let text = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        message = ""
+        messages.append(ChatMessage(text: text, fromUser: true))
+
+        Task {
+            let response = await service.send(text)
+            messages.append(ChatMessage(text: response, fromUser: false))
+        }
     }
 
     private func icon(for item: String) -> String {
