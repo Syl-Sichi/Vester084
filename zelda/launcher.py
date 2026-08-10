@@ -19,7 +19,12 @@ def launch() -> None:
     print(startup_message())
 
     if needs_setup():
-        first_run_onboarding()
+        if platform.system() == "Darwin":
+            from zelda.macos_setup import setup
+            print("Fresh macOS installation detected. Running automatic setup...")
+            setup()
+        else:
+            first_run_onboarding()
 
     from zelda.cli import main
     main()
