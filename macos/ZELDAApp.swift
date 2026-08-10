@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 @main
 struct ZELDAApp: App {
@@ -15,12 +16,21 @@ struct ChatMessage: Identifiable {
     let fromUser: Bool
 }
 
+struct DisplayRecord: Identifiable {
+    let id: String
+    let name: String
+    let isPrimary: Bool
+    let width: Int
+    let height: Int
+}
+
 struct ContentView: View {
     private let views = ["Chat", "System", "Apps", "Files", "Security", "Settings"]
     @StateObject private var service = ZELDAServiceClient()
     @State private var selectedView = "Chat"
     @State private var message = ""
     @State private var messages: [ChatMessage] = []
+    @State private var displays: [DisplayRecord] = []
 
     var body: some View {
         NavigationSplitView {
@@ -69,6 +79,8 @@ struct ContentView: View {
                             .buttonStyle(.borderedProminent)
                             .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
+                } else if selectedView == "System" {
+                    systemView
                 } else {
                     ContentUnavailableView(
                         selectedView,
@@ -78,9 +90,61 @@ struct ContentView: View {
                 }
             }
             .padding()
-            .task { await service.checkHealth() }
+            .task {
+                await service.checkHealth()
+                refreshDisplays()
+            }
         }
         .frame(minWidth: 820, minHeight: 560)
+    }
+
+    private var systemView: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Displays")
+                    .font(.headline)
+
+                if displays.isEmpty {
+                    Text("No display information available.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(displays) { display in
+                        HStack {
+                            Image(systemName: display.isPrimary ? "display" : "rectangle.on.rectangle")
+                            VStack(alignment: .leading) {
+                                Text(display.name)
+                                Text("\(display.width) × \(display.height)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if display.isPrimary {
+                                Text("Primary")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding()
+                        .background(Color.secondary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func refreshDisplays() {
+        displays = NSScreen.screens.enumerated().map { index, screen in
+            let frame = screen.frame
+            return DisplayRecord(
+                id: screen.localizedName + "-\(index)",
+                name: screen.localizedName,
+                isPrimary: screen == NSScreen.main,
+                width: Int(frame.width),
+                height: Int(frame.height)
+            )
+        }
     }
 
     private func sendMessage() {
